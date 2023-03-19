@@ -1,0 +1,417 @@
+//
+//  TipTribeApp.swift
+//  TipTribe
+//
+// This is the mobile
+//
+
+import SwiftUI
+
+@main
+struct TipTribeApp: App {
+    @StateObject var tipSettings = TipSettings()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(tipSettings)
+        }
+    }
+}
+    
+struct ContentView: View {
+    @EnvironmentObject var tipSettings: TipSettings
+    @State private var salesAmount = ""
+    @State private var waitAssistantTipPercentage = 0.0
+    @State private var foodRunnerTipPercentage = 0.0
+    @State private var barTipPercentage = 0.0
+    @State private var otherTipPercentage = 0.0
+    
+    @State private var waitAssistantCustomPercentage = ""
+    @State private var foodRunnerCustomPercentage = ""
+    @State private var barCustomPercentage = ""
+    @State private var otherCustomPercentage = ""
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                ZStack(alignment: .top) {
+                    Color.blue
+                        .frame(height: 300)
+                        .ignoresSafeArea()
+                    
+                    VStack {
+                        Image("Logo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 120)
+                            .padding(.top, 80)
+                            .edgesIgnoringSafeArea(.all)
+                        HStack {
+                            Text("$")
+                                .foregroundColor(.white)
+                                .font(.title)
+                                .bold()
+                            TextField("Sales Amount", text: $salesAmount)
+                                .font(.title2)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(8.0)
+                                .keyboardType(.decimalPad)
+                        }.frame(alignment: .center)
+                            .padding(.bottom, 28)
+                        
+                        
+                        // Wait Assistant Tip Percentage
+                        HStack {
+                            HStack {
+                                Text("\(waitAssistantCustomPercentage.isEmpty ? Int(waitAssistantTipPercentage) : Int(Double(waitAssistantCustomPercentage) ?? 0))%")
+                                    .font(.title3)
+                                    .bold()
+                            }.frame(width: 60)
+                            
+                            VStack {
+                                HStack {
+                                    Text(tipSettings.waitAssistantDisplayName)
+                                        .font(.title3)
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Spacer()
+                                    Text("$\(waitAssistantTipAmount, specifier: "%.2f")")
+                                        .font(.title3)
+                                        .foregroundColor(.orange)
+                                        .bold()
+                                        .padding(8)
+                                        .lineLimit(1)
+                                        .background(RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.white)
+                                            .shadow(radius: 1))
+                                }
+                                .padding(.top, 20)
+                                .padding(.horizontal)
+                                HStack {
+                                    Slider(value: $waitAssistantTipPercentage, in: 0...5, step: 1.0)
+                                        .disabled(!waitAssistantCustomPercentage.isEmpty)
+                                        .accentColor(Color.orange)
+                                    TextField("Custom", text: $waitAssistantCustomPercentage)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .keyboardType(.decimalPad)
+                                        .frame(width: 80)
+                                        .onChange(of: waitAssistantCustomPercentage) { newValue in
+                                            let filtered = newValue.filter { "0123456789".contains($0) }
+                                            if filtered != newValue {
+                                                self.waitAssistantCustomPercentage = filtered
+                                            }
+                                            self.waitAssistantCustomPercentage = filtered.limit(3)
+                                        }
+                                    Text("%")
+                                        .font(.system(size: 14))
+                                }
+                                .padding()
+                            }
+                            .background(RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(radius: 3))
+                        }
+                        
+                        // Food Runner Tip Percentage
+                        HStack {
+                            HStack {
+                                Text("\(foodRunnerCustomPercentage.isEmpty ? Int(foodRunnerTipPercentage) : Int(Double(foodRunnerCustomPercentage) ?? 0))%")
+                                    .font(.title3)
+                                    .bold()
+                            }.frame(width: 60)
+                            
+                            VStack {
+                                HStack {
+                                    Text(tipSettings.foodRunnerDisplayName)
+                                        .font(.title3)
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Spacer()
+                                    Text("$\(foodRunnerTipAmount, specifier: "%.2f")")
+                                        .font(.title3)
+                                        .foregroundColor(.orange)
+                                        .bold()
+                                        .padding(8)
+                                        .lineLimit(1)
+                                        .background(RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.white)
+                                            .shadow(radius: 1))
+                                }
+                                .padding(.top, 20)
+                                .padding(.horizontal)
+                                HStack {
+                                    Slider(value: $foodRunnerTipPercentage, in: 0...5, step: 1.0)
+                                        .disabled(!foodRunnerCustomPercentage.isEmpty)
+                                        .accentColor(Color.orange)
+                                    TextField("Custom", text: $foodRunnerCustomPercentage)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .keyboardType(.decimalPad)
+                                        .frame(width: 80)
+                                        .onChange(of: foodRunnerCustomPercentage) { newValue in
+                                            let filtered = newValue.filter { "0123456789".contains($0) }
+                                            if filtered != newValue {
+                                                self.foodRunnerCustomPercentage = filtered
+                                            }
+                                            self.foodRunnerCustomPercentage = filtered.limit(3)
+                                        }
+                                    Text("%")
+                                        .font(.system(size: 14))
+                                }
+                                .padding()
+                            }
+                            .background(RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(radius: 3))
+                            
+                        }
+                        
+                        // Bar Tip Percentage
+                        HStack {
+                            HStack {
+                                Text("\(barCustomPercentage.isEmpty ? Int(barTipPercentage) : Int(Double(barCustomPercentage) ?? 0))%")
+                                    .font(.title3)
+                                    .bold()
+                            }.frame(width: 60)
+                            
+                            VStack {
+                                HStack {
+                                    Text(tipSettings.barDisplayName)
+                                        .font(.title3)
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Spacer()
+                                    Text("$\(barTipAmount, specifier: "%.2f")")
+                                        .font(.title3)
+                                        .foregroundColor(.orange)
+                                        .bold()
+                                        .padding(8)
+                                        .lineLimit(1)
+                                        .background(RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.white)
+                                            .shadow(radius: 1))
+                                }
+                                .padding(.top, 20)
+                                .padding(.horizontal)
+                                HStack {
+                                    Slider(value: $barTipPercentage, in: 0...5, step: 1.0)
+                                        .disabled(!barCustomPercentage.isEmpty)
+                                        .accentColor(Color.orange)
+                                    TextField("Custom", text: $barCustomPercentage)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .keyboardType(.decimalPad)
+                                        .frame(width: 80)
+                                        .onChange(of: barCustomPercentage) { newValue in
+                                            let filtered = newValue.filter { "0123456789".contains($0) }
+                                            if filtered != newValue {
+                                                self.barCustomPercentage = filtered
+                                            }
+                                            self.barCustomPercentage = filtered.limit(3)
+                                        }
+                                    Text("%")
+                                        .font(.system(size: 14))
+                                }
+                                .padding()
+                            }
+                            .background(RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(radius: 3))
+                            
+                        }
+                        
+                        // Other Tip Percentage
+                        HStack {
+                            HStack {
+                                Text("\(otherCustomPercentage.isEmpty ? Int(otherTipPercentage) : Int(Double(otherCustomPercentage) ?? 0))%")
+                                    .font(.title3)
+                                    .bold()
+                            }.frame(width: 60)
+                            
+                            VStack {
+                                HStack {
+                                    Text(tipSettings.otherDisplayName)
+                                        .font(.title3)
+                                        .bold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Spacer()
+                                    Text("$\(otherTipAmount, specifier: "%.2f")")
+                                        .font(.title3)
+                                        .foregroundColor(.orange)
+                                        .bold()
+                                        .padding(8)
+                                        .lineLimit(1)
+                                        .background(RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.white)
+                                            .shadow(radius: 1))
+                                }
+                                .padding(.top, 20)
+                                .padding(.horizontal)
+                                HStack {
+                                    Slider(value: $otherTipPercentage, in: 0...5, step: 1.0)
+                                        .disabled(!otherCustomPercentage.isEmpty)
+                                        .accentColor(Color.orange)
+                                    TextField("Custom", text: $otherCustomPercentage)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .keyboardType(.decimalPad)
+                                        .frame(width: 80)
+                                        .onChange(of: otherCustomPercentage) { newValue in
+                                            let filtered = newValue.filter { "0123456789".contains($0) }
+                                            if filtered != newValue {
+                                                self.otherCustomPercentage = filtered
+                                            }
+                                            self.otherCustomPercentage = filtered.limit(3)
+                                        }
+                                    Text("%")
+                                        .font(.system(size: 14))
+                                }
+                                .padding()
+                            }
+                            .background(RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(radius: 3))
+                            
+                        }
+                        
+                        // Total amount tipped
+                        HStack {
+                            Text("Total amount tipped:")
+                                .font(.title3)
+                                .bold()
+                            Spacer()
+                            Text("$\(totalAmountTipped, specifier: "%.2f")")
+                                .font(.title3)
+                                .foregroundColor(.orange)
+                                .bold()
+                                .padding(8)
+                                .lineLimit(1)
+                                .background(RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white)
+                                    .shadow(radius: 1))
+                        }
+                        .padding(.horizontal)
+                        
+                        // Total earnings
+                        HStack {
+                            Text("Total earnings:")
+                                .font(.title3)
+                                .bold()
+                            Spacer()
+                            Text("$\(totalEarnings, specifier: "%.2f")")
+                                .font(.title3)
+                                .foregroundColor(.orange)
+                                .bold()
+                                .padding(8)
+                                .lineLimit(1)
+                                .background(RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white)
+                                    .shadow(radius: 1))
+                        }
+                        .padding(.horizontal)
+                        
+                        // Buttons
+                        HStack {
+                            NavigationLink(destination: SettingsView().environmentObject(CurrencySettings())) {
+                                                Text("Settings")
+                                            }
+                            .environmentObject(CurrencySettings())
+                            Spacer()
+                            Button("Clear") {
+                                resetValues()
+                            }
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10) // add this modifier to create rounded corners
+                            
+                            .padding()
+                        }
+                    }
+                    .padding()
+                    // GestureOverlay
+                    //Color.clear
+                    //.contentShape(Rectangle())
+                    .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                }
+            } .edgesIgnoringSafeArea(.all)
+        }
+    }
+    
+    private func resetValues() {
+        salesAmount = ""
+        waitAssistantTipPercentage = 0.0
+        foodRunnerTipPercentage = 0.0
+        barTipPercentage = 0.0
+        otherTipPercentage = 0.0
+        
+        waitAssistantCustomPercentage = ""
+        foodRunnerCustomPercentage = ""
+        barCustomPercentage = ""
+        otherCustomPercentage = ""
+    }
+    
+    
+    private var totalAmountTipped: Double {
+        return waitAssistantTipAmount + foodRunnerTipAmount + barTipAmount + otherTipAmount
+    }
+    
+    private var totalEarnings: Double {
+        let salesAmountDouble = Double(salesAmount) ?? 0
+        return salesAmountDouble - totalAmountTipped
+    }
+    
+    
+    private var waitAssistantTipAmount: Double {
+        let salesAmountDouble = Double(salesAmount) ?? 0
+        if waitAssistantCustomPercentage.isEmpty {
+            return salesAmountDouble * waitAssistantTipPercentage / 100
+        } else {
+            let customPercentage = Double(waitAssistantCustomPercentage) ?? 0
+            return salesAmountDouble * customPercentage / 100
+        }
+    }
+    
+    private var foodRunnerTipAmount: Double {
+        let salesAmountDouble = Double(salesAmount) ?? 0
+        if foodRunnerCustomPercentage.isEmpty {
+            return salesAmountDouble * foodRunnerTipPercentage / 100
+        } else {
+            let customPercentage = Double(foodRunnerCustomPercentage) ?? 0
+            return salesAmountDouble * customPercentage / 100
+        }
+    }
+    
+    private var barTipAmount: Double {
+        let salesAmountDouble = Double(salesAmount) ?? 0
+        if barCustomPercentage.isEmpty {
+            return salesAmountDouble * barTipPercentage / 100
+        } else {
+            let customPercentage = Double(barCustomPercentage) ?? 0
+            return salesAmountDouble * customPercentage / 100
+        }
+    }
+    
+    private var otherTipAmount: Double {
+        let salesAmountDouble = Double(salesAmount) ?? 0
+        if otherCustomPercentage.isEmpty {
+            return salesAmountDouble * otherTipPercentage / 100
+        } else {
+            let customPercentage = Double(otherCustomPercentage) ?? 0
+            return salesAmountDouble * customPercentage / 100
+        }
+    }
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {
+            ContentView()
+                .environmentObject(CurrencySettings())
+        }
+    }
+        }
+
+extension String {
+    func limit(_ n: Int) -> String {
+        return String(self.prefix(n))
+    }
+}
