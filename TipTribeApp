@@ -25,6 +25,7 @@ struct TipTribeApp: App {
 struct ContentView: View {
     @StateObject var tipSettings = TipSettings()
     @StateObject var currencySettings = CurrencySettings()
+    @State private var roundUpChecked = false
     @State private var salesAmount = ""
     @State private var waitAssistantTipPercentage = 0.0
     @State private var foodRunnerTipPercentage = 0.0
@@ -37,13 +38,12 @@ struct ContentView: View {
     @State private var otherCustomPercentage = ""
     
     var body: some View {
-        NavigationView {
+        TabView {
             ScrollView {
                 ZStack(alignment: .top) {
                     Color.blue
                         .frame(height: 300)
                         .ignoresSafeArea()
-                    
                     
                     VStack {
                         Image("Logo")
@@ -65,13 +65,6 @@ struct ContentView: View {
                                 .keyboardType(.decimalPad)
                         }.frame(alignment: .center)
                             .padding(.bottom, 28)
-                        
-                        VStack {
-                                   Text("Selected currency code: \(currencySettings.currencyCode)")
-                                       .padding()
-                                   Text("Currency symbol: \(currencySettings.currencySymbol)")
-                                       .padding()
-                               }
                         
                         .environmentObject(tipSettings)
                         .environmentObject(currencySettings)
@@ -143,7 +136,7 @@ struct ContentView: View {
                                         .bold()
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     Spacer()
-                                    Text("$\(foodRunnerTipAmount, specifier: "%.2f")")
+                                    Text("\(currencySettings.currencySymbol)\(foodRunnerTipAmount, specifier: "%.2f")")
                                         .font(.title3)
                                         .foregroundColor(.orange)
                                         .bold()
@@ -196,7 +189,7 @@ struct ContentView: View {
                                         .bold()
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     Spacer()
-                                    Text("$\(barTipAmount, specifier: "%.2f")")
+                                    Text("\(currencySettings.currencySymbol)\(barTipAmount, specifier: "%.2f")")
                                         .font(.title3)
                                         .foregroundColor(.orange)
                                         .bold()
@@ -249,7 +242,7 @@ struct ContentView: View {
                                         .bold()
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     Spacer()
-                                    Text("$\(otherTipAmount, specifier: "%.2f")")
+                                    Text("\(currencySettings.currencySymbol)\(otherTipAmount, specifier: "%.2f")")
                                         .font(.title3)
                                         .foregroundColor(.orange)
                                         .bold()
@@ -289,52 +282,41 @@ struct ContentView: View {
                         
                         // Total amount tipped
                         HStack {
+                            Text("ROUND UP / DOWN TOTAL AMOUNT(S)")
+                                .font(.body)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .lineLimit(1)
+                            Toggle("", isOn: $roundUpChecked)
+                                .frame(maxWidth: 50, alignment: .trailing)
+                        } .toggleStyle(CheckboxToggleStyle())
+                        HStack {
                             Text("Total amount tipped:")
                                 .font(.title3)
-                                .bold()
-                            Spacer()
-                            Text("$\(totalAmountTipped, specifier: "%.2f")")
-                                .font(.title3)
-                                .foregroundColor(.orange)
-                                .bold()
-                                .padding(8)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                                 .lineLimit(1)
-                                .background(RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
-                                    .shadow(radius: 1))
+                            Spacer()
+                            Text("\(currencySettings.currencySymbol)\(totalAmountTipped, specifier: "%.2f")")
+                                .font(.title2)
+                                .bold()
+                                //.padding(8)
+                                .lineLimit(1)
                         }
-                        .padding(.horizontal)
+                        //.padding(.horizontal)
                         
                         // Total earnings
                         HStack {
                             Text("Total earnings:")
                                 .font(.title3)
-                                .bold()
-                            Spacer()
-                            Text("$\(totalEarnings, specifier: "%.2f")")
-                                .font(.title3)
-                                .foregroundColor(.orange)
-                                .bold()
-                                .padding(8)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                                 .lineLimit(1)
-                                .background(RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
-                                    .shadow(radius: 1))
+                            Spacer()
+                            Text("\(currencySettings.currencySymbol)\(totalEarnings, specifier: "%.2f")")
+                                .font(.title2)
+                                .bold()
+                                //.padding(8)
+                                .lineLimit(1)
                         }
-                        .padding(.horizontal)
-                        
-                        // Buttons
-                        HStack {
-                            Button("Clear") {
-                                resetValues()
-                            }
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10) // add this modifier to create rounded corners
-                            
-                            .padding()
-                        }
+                        //.padding(.horizontal)
                     }
                     .padding()
                     // GestureOverlay
@@ -344,18 +326,60 @@ struct ContentView: View {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
                 }
-            } .edgesIgnoringSafeArea(.all)
+                
+                // Buttons
+                ZStack {
+                    Button("Clear") {
+                        resetValues()
+                    }
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10) // add this modifier to create rounded corners
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing)
+                }
+                
+                
+            } .edgesIgnoringSafeArea(.top)
+                .tabItem {Image(systemName: "house.fill")
+                    Text("Home")}
+            
+            
+            Form {
+                Section(header: Text("Tip Categories")) {
+                    TextField("Wait Assistant", text: $tipSettings.waitAssistantName)
+                    TextField("Food Runner", text: $tipSettings.foodRunnerName)
+                    TextField("Bar", text: $tipSettings.barName)
+                    TextField("Other", text: $tipSettings.otherName)
+                }
+                Section(header: Text("Currency")) {
+                    Picker(selection: $currencySettings.currencyCode, label: Text("Select Currency")) {
+                        Text("USD").tag("USD")
+                        Text("EUR").tag("EUR")
+                        Text("JPY").tag("JPY")
+                    }
+                    .onChange(of: currencySettings.currencyCode) { newValue in
+                        // Update the currencyCode property in the CurrencySettings object
+                        currencySettings.currencyCode = newValue
+                    }
+                }
+            }
+
+            .tabItem {Image(systemName: "slider.horizontal.3")
+                Text("Settings")}
         }
-        .navigationBarTitle("TipTribe")
-        .navigationBarItems(trailing:
-            NavigationLink(destination: SettingsView()
-                            .environmentObject(tipSettings)
-                            .environmentObject(currencySettings)) {
-                                Text("Settings")
-                            })
-        .navigationViewStyle(StackNavigationViewStyle())
-//        .environmentObject(tipSettings)
-//        .environmentObject(currencySettings)
+        //        .navigationBarTitle("TipTribe")
+        //        .navigationBarItems(trailing:
+        //            NavigationLink(destination: SettingsView()
+        //                            .environmentObject(tipSettings)
+        //                            .environmentObject(currencySettings)) {
+        //                                Text("Settings")
+        //                            })
+        //        .navigationViewStyle(StackNavigationViewStyle())
+        //        .environmentObject(tipSettings)
+        //        .environmentObject(currencySettings)
+
     }
     
     private func resetValues() {
@@ -419,7 +443,32 @@ struct ContentView: View {
             let customPercentage = Double(otherCustomPercentage) ?? 0
             return salesAmountDouble * customPercentage / 100
         }
+        
     }
+    struct CheckboxToggleStyle: ToggleStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            HStack {
+     
+                RoundedRectangle(cornerRadius: 5.0)
+                    .stroke(lineWidth: 2)
+                    .frame(width: 25, height: 25)
+                    .cornerRadius(5.0)
+                    .overlay {
+                        Image(systemName: configuration.isOn ? "checkmark" : "")
+                    }
+                    .onTapGesture {
+                        withAnimation(.spring()) {
+                            configuration.isOn.toggle()
+                        }
+                    }
+     
+                configuration.label
+     
+            }
+        }
+    }
+    
+    
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
             ContentView()
